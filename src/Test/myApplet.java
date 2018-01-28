@@ -11,12 +11,14 @@ import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
 import java.awt.image.PixelGrabber;
 import java.io.File;
+import java.io.IOException;
 
 
 public class myApplet extends Applet {
 
-    private Image img = getImage(getCodeBase(),"objectsH29.jpg");
+    private Image img;
     private Image new_img;
+    private BufferedImage imageFile;
 
     private int w = 0;
     private int h = 0;
@@ -28,6 +30,7 @@ public class myApplet extends Applet {
     // Color bin;
 
     public void init(){
+        img = getImage(getCodeBase(),"objectsH29.jpg");
 
         MediaTracker mt = new MediaTracker(this);
         mt.addImage(img,0);
@@ -44,17 +47,19 @@ public class myApplet extends Applet {
         pix = new int[w*h];
         new_pix = new int[w*h];
 
-        setPix();
+        try {
+            setPix();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
-    private void setPix(){
+    private void setPix() throws IOException {
         try{
             PixelGrabber pg = new PixelGrabber(img,0,0,w,h,pix,0,w);
             pg.grabPixels();
         }
-        catch(InterruptedException e){
-            System.out.println("画像が読み込めません");
-        }
+        catch(InterruptedException e){}
 
         Shading sh = new Shading();
         Filter filter = new Filter();
@@ -72,12 +77,11 @@ public class myApplet extends Applet {
 
         MemoryImageSource mimg = new MemoryImageSource(w,h,pix,0,w);
         new_img = createImage(mimg);
-        try {
-            BufferedImage bimg = new BufferedImage(img.getWidth(this),img.getHeight(this),BufferedImage.TYPE_INT_ARGB);
-            ImageIO.write(bimg, "png", new File("test.png"));
-        } catch (Exception e) {
-            System.out.println("error");
-        }
+
+        imageFile = new BufferedImage(img.getWidth(null),img.getHeight(null),BufferedImage.TYPE_INT_ARGB);
+        imageFile.setRGB(0,0,w,h,pix,0,w);
+        pix = imageFile.getRGB(0, 0, w, h, null, 0, w);
+        ImageIO.write(imageFile, "png", new File("/Users/e155763/src/java/subject/6/test.png"));
     }
 
     public void paint(Graphics g){
