@@ -24,7 +24,7 @@ public class myApplet extends Applet {
     private int h = 0;
 
     private int pix[];
-    private int new_pix[];
+    private int newPix[];
 
     // Color color;
     // Color bin;
@@ -45,7 +45,7 @@ public class myApplet extends Applet {
         h = img.getHeight(this);
 
         pix = new int[w*h];
-        new_pix = new int[w*h];
+        newPix = new int[w*h];
 
         try {
             setPix();
@@ -62,7 +62,7 @@ public class myApplet extends Applet {
         catch(InterruptedException e){}
 
         Shading sh = new Shading();
-        Filter filter = new Filter();
+        Filter filter = new Filter(w, h);
 
         // 一枚めの画像処理
         //sh.toGrayScale(pix, w, h);
@@ -71,16 +71,16 @@ public class myApplet extends Applet {
         //filter.sobelFilterX(pix, w, h);
         //sh.toBinaryImage(pix, w, h);
         //sh.toNot(pix, w, h);
-        filter.canny(pix, w, h, 0.3, 0,0);
+        filter.canny(pix, newPix, 0.1, 25,125);
 
 
 
-        MemoryImageSource mimg = new MemoryImageSource(w,h,pix,0,w);
+        MemoryImageSource mimg = new MemoryImageSource(w,h,newPix,0,w);
         new_img = createImage(mimg);
 
-        imageFile = new BufferedImage(img.getWidth(null),img.getHeight(null),BufferedImage.TYPE_INT_ARGB);
-        imageFile.setRGB(0,0,w,h,pix,0,w);
-        pix = imageFile.getRGB(0, 0, w, h, null, 0, w);
+        imageFile = new BufferedImage(w,h,BufferedImage.TYPE_INT_ARGB);
+        imageFile.setRGB(0,0,w,h,newPix,0,w);
+        newPix = imageFile.getRGB(0, 0, w, h, null, 0, w);
         ImageIO.write(imageFile, "png", new File("/Users/e155763/src/java/subject/6/test.png"));
     }
 
