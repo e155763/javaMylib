@@ -87,7 +87,7 @@ public class Filter {
     }
 
     // フィルタリングする際の初期化
-    private void init(int pix[]) {
+    private void padding(int pix[]) {
         value = new double[w*h];
         setExtendPix();
         for (int i = 0; i < w; i++) {
@@ -123,7 +123,7 @@ public class Filter {
     }
 
     // canny法用
-    private void init(double pix[]) {
+    private void padding(double pix[]) {
         value = new double[w*h];
 
         setExtendPixD();
@@ -179,7 +179,7 @@ public class Filter {
         int ave = filterScale * filterScale;
         Arrays.fill(kernel, 1 / ave);
 
-        init(pix);
+        padding(pix);
         convolution(newPix, kernel);
     }
 
@@ -190,7 +190,7 @@ public class Filter {
         this.kernel = new double[filterScale * filterScale];
         double normalize = 0.0;
 
-        init(pix);
+        padding(pix);
 
         //フィルタの作成
         for (int x = 0; x < filterScale; x++) {
@@ -210,7 +210,7 @@ public class Filter {
         this.filterScale = 3;
         this.extraPix = (1 + filterScale) / 2 - 1;
         this.kernel = new double[]{-1, 0, 1, -2, 0, 2, -1, 0, 1};
-        init(pix);
+        padding(pix);
         convolution(newPix, kernel);
     }
 
@@ -219,7 +219,7 @@ public class Filter {
         this.filterScale = 3;
         this.extraPix = (1 + filterScale) / 2 - 1;
         this.kernel = new double[]{1, 2, 1, 0, 0, 0, -1, -2, -1};
-        init(pix);
+        padding(pix);
         convolution(newPix, kernel);
     }
 
@@ -234,11 +234,8 @@ public class Filter {
         int center;
 
         double[] d = new double[w*h];
-        Shading sh = new Shading();
 
-        sh.toGrayScale(pix, w, h);
-
-        gaussianFilter(pix, pix, 5, sigma);
+        gaussianFilter(pix, newPix, 5, sigma);
 
         sobelFilterX(pix,null);
         System.arraycopy(value, 0, fx, 0, pix.length);
@@ -255,7 +252,7 @@ public class Filter {
         this.filterScale = 3;
         this.extraPix = (1 + filterScale) / 2 - 1;
 
-        init(g);
+        padding(g);
         for(int x = 0; x < w; x++){
             for(int y = 0; y < h; y++){
                 setKernelD(x, y);
@@ -282,7 +279,7 @@ public class Filter {
         }
 
         // Hysteresis Threshold
-        init(newPix);
+        padding(newPix);
 
         for(int x = 0; x < w; x++) {
             for (int y = 0; y < h; y++) {
@@ -292,8 +289,8 @@ public class Filter {
                     newPix[getPixPoint(x,y)] = pixColor.WHITE;
                 }else if(thLow < center && center < thHigh){
                     for (int aKernelPix : kernelPix) {
-                        if (thHigh <= pixColor.getRed(aKernelPix)) {
-                            newPix[getPixPoint(x, y)] = pixColor.BLACK;
+                        if (thHigh < pixColor.getGray(aKernelPix)) {
+                            newPix[getPixPoint(x, y)] = pixColor.WHITE;
                             break;
                         }
                         newPix[getPixPoint(x, y)] = pixColor.BLACK;

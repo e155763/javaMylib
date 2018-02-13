@@ -4,39 +4,59 @@ package ImageProcessing;
  * Created by e155763 on 2018/01/03.
  */
 
-import java.awt.Color;
-
 public class Shading {
 
-    private Color color;
-
-    private int w;
-    private int h;
+    private Color color = new Color();
 
     public Shading() {
 
     }
 
-    public void toGrayScale(int pix[], int width, int height) {
-        this.w = width;
-        this.h = height;
-        int r, g, b; //色データ
-        int d;
-        for (int i = 0; i < w * h; i++) {
-            color = new Color(pix[i]);
-            r = color.getRed();
-            g = color.getGreen();
-            b = color.getBlue();
-            d = (r * 2126 + g * 7152 + b * 722) / 10000;
-            color = new Color(d, d, d);
-            pix[i] = color.getRGB();
+    public void toneCurve(int pix[], int newPix[], int thLow, int thHigh){
+        int gray;
+        for (int i = 0; i < pix.length; i++){
+            gray = color.getGray(pix[i]);
+            if(gray < thLow){
+                gray = color.BLACK;
+            }else if(thHigh < gray){
+                gray = color.WHITE;
+            }else{
+                gray = (int)((double)0xFF * (double)(gray - thLow) / (double)(thHigh - thLow));
+            }
+            newPix[i] = color.getGRAY(gray);
+        }
+    }
+
+    public void histogramEqualization(int pix[], int newPix[]){
+        int[] hist = histogram(pix);
+        int ave = pix.length / 0xFF;
+        int tmp;
+        int gray;
+        for(int i = 0; i < pix.length; i++){
+            tmp = 0;
+            for(int j = 0; j < color.getGray(pix[i]); j++){
+                tmp += hist[j];
+            }
+            gray = (int)((double)0xFF*(double)tmp/(double)pix.length);
+            newPix[i] = color.getGRAY(gray);
         }
     }
 
 
-    public void toBinaryImage(int pix[], int width, int height) {
-        this.w = width;
-        this.h = height;
+    public void toGrayScale(int pix[], int newPix[]) {
+        int r, g, b; //色データ
+        int d;
+        for (int i = 0; i < pix.length; i++) {
+            r = color.getRed(pix[i]);
+            g = color.getGreen(pix[i]);
+            b = color.getBlue(pix[i]);
+            d = (r * 2126 + g * 7152 + b * 722) / 10000;
+            newPix[i] = color.getRGB(d, d, d);
+        }
+    }
+
+
+    public void toBinaryImage(int pix[]) {
         int[] hist = histogram(pix);//ヒストグラムを取得
         int max = Integer.MIN_VALUE;
         int s = 0;//閾値
@@ -75,41 +95,32 @@ public class Shading {
             }
         }
 
-        for (int i = 0; i < w * h; i++) {
-            color = new Color(pix[i]);
-            if ((color.getRGB() & 0xFF) > s) {
-                bin = Color.WHITE;
+        for (int i = 0; i < pix.length; i++) {
+            if (color.getGray(pix[i]) > s) {
+                pix[i] = color.WHITE;
             } else {
-                bin = Color.BLACK;
+                pix[i] = color.BLACK;
             }
-            pix[i] = bin.getRGB();
         }
     }
 
-    public void toNot(int pix[], int width, int height){
-        this.w = width;
-        this.h = height;
-        Color not; //反転した色情報
-        for (int i = 0; i < w * h; i++) {
-            color = new Color(pix[i]);
-            if ((color.getRGB() & 0xFF) != 0xFF) {
-                not = Color.WHITE;
+    public void toNot(int pix[]){
+        for (int i = 0; i < pix.length; i++) {
+            if ((color.getRGB(pix[i]) & 0xFF) != 0xFF) {
+                pix[i] = color.WHITE;
             } else {
-                not = Color.BLACK;
+                pix[i] = color.BLACK;
             }
-            pix[i] = not.getRGB();
         }
     }
 
     private int[] histogram(int pix[]) {
         int hist[] = new int[0xFF+1];
-        Color pix_color;
 
         for (int i = 0; i <= 0xFF; i++) {
             int buf = 0;
-            for (int j = 0; j < w * h; j++) {
-                pix_color = new Color(pix[j]);
-                if (pix_color.getRed() == i) {
+            for (int j = 0; j < pix.length; j++) {
+                if (color.getGray(pix[j]) == i) {
                     buf++;
                 }
             }

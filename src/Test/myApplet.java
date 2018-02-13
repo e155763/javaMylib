@@ -2,6 +2,7 @@
 //
 
 import ImageProcessing.Filter;
+import ImageProcessing.HoughTransform;
 import ImageProcessing.Shading;
 
 import javax.imageio.ImageIO;
@@ -63,15 +64,14 @@ public class myApplet extends Applet {
 
         Shading sh = new Shading();
         Filter filter = new Filter(w, h);
+        HoughTransform ht = new HoughTransform(w,h);
 
         // 一枚めの画像処理
-        //sh.toGrayScale(pix, w, h);
-        //filter.gaussianFilter(pix, w, h, 5, 0.3);
-        //filter.sobelFilterY(pix, w, h);
-        //filter.sobelFilterX(pix, w, h);
-        //sh.toBinaryImage(pix, w, h);
-        //sh.toNot(pix, w, h);
-        filter.canny(pix, newPix, 0.1, 25,125);
+        sh.toGrayScale(pix, newPix);
+        //sh.toneCurve(newPix, newPix, 80, 230);
+        sh.histogramEqualization(newPix,newPix);
+        filter.canny(newPix, newPix, 0.5, 30,100);
+        ht.circle(newPix, 28, 35, 60, 40);
 
 
 
@@ -84,8 +84,10 @@ public class myApplet extends Applet {
         ImageIO.write(imageFile, "png", new File("/Users/e155763/src/java/subject/6/test.png"));
     }
 
+
     public void paint(Graphics g){
         g.drawImage(new_img,0,0,this);
     }
+
 
 }

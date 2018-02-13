@@ -80,6 +80,10 @@ public class Color {
         return 0xFF000000 | (red << 16) | (green << 8) | blue;
     }
 
+    public int getRGB(int pix){
+        return 0x00FFFFFF & pix;
+    }
+
     public int getARGB(int alpha, int red, int green, int blue){
         return (alpha << 24) | (red << 16) | (green << 8) | blue;
     }
